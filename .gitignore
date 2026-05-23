@@ -1,0 +1,22 @@
+# Ignorar todos os ambientes virtuais em qualquer nível de pasta
+**/venv/
+**/.venv/
+**/env/
+**/ENV/
+
+# Ignorar todos os arquivos de configuração local com credenciais
+**/.env
+**/.env.local
+**/.env.*.local
+
+# Ignorar caches do Python e compilados
+**/__pycache__/
+**/*.py[cod]
+**/*.log
+
+# Ignorar os arquivos antigos "soltos" apenas na raiz do projeto (caminho absoluto da raiz)
+/.env
+/requirements.txt
+/requeriment.txt
+/analise_gateway_ssh.py
+/liga_production_valida_iris_list_v2.py

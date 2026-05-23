@@ -1,0 +1,23 @@
+# Ambiente virtual Python
+venv/
+.venv/
+env/
+ENV/
+bin/
+lib/
+include/
+
+# Credenciais e configurações sensíveis locais
+.env
+.env.local
+.env.*.local
+
+# Python caches e compilados
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Logs
+*.log

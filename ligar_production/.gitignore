@@ -1,0 +1,41 @@
+# Ambientes virtuais de Python
+venv/
+.venv/
+env/
+ENV/
+bin/
+lib/
+include/
+
+# Arquivos de credenciais locais (Sensível - NÃO ENVIAR PARA O GITHUB)
+.env
+.env.local
+.env.*.local
+
+# Python caches e temporários
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Logs do sistema e webdriver
+*.log
+geckodriver.log
+chromedriver.log
+ghostdriver.log

@@ -1,0 +1,5 @@
+requests
+paramiko
+selenium
+webdriver-manager
+python-dotenv
