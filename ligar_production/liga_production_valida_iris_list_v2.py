@@ -53,16 +53,58 @@ def emitir_alerta_sonoro():
 
 
 def enviar_teams(msg, status):
-    color = "00FF00" if status == "Sucesso" else "FF0000"
-    payload = {
-        "@type": "MessageCard",
-        "@context": "http://schema.org/extensions",
-        "themeColor": color,
-        "summary": "Status Produção IRIS",
-        "sections": [{"activityTitle": f"Automação IRIS: {status}", "text": msg, "markdown": True}]
-    }
+    if not TEAMS_WEBHOOK_URL:
+        logging.warning("TEAMS_WEBHOOK_URL não está configurada no arquivo .env.")
+        return
+
+    is_modern_workflow = "logic.azure.com" in TEAMS_WEBHOOK_URL
+
+    if is_modern_workflow:
+        # Formato moderno para Workflows do Teams (Power Automate) usando Adaptive Card
+        payload = {
+            "type": "message",
+            "attachments": [
+                {
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "content": {
+                        "type": "AdaptiveCard",
+                        "version": "1.2",
+                        "body": [
+                            {
+                                "type": "TextBlock",
+                                "text": f"**Automação IRIS: {status}**",
+                                "weight": "Bolder",
+                                "size": "Medium",
+                                "color": "Good" if status == "Sucesso" else "Attention"
+                            },
+                            {
+                                "type": "TextBlock",
+                                "text": msg,
+                                "wrap": True
+                            }
+                        ],
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+                    }
+                }
+            ]
+        }
+    else:
+        # Formato legado (MessageCard)
+        color = "00FF00" if status == "Sucesso" else "FF0000"
+        payload = {
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "themeColor": color,
+            "summary": "Status Produção IRIS",
+            "sections": [{"activityTitle": f"Automação IRIS: {status}", "text": msg, "markdown": True}]
+        }
+
     try:
-        requests.post(TEAMS_WEBHOOK_URL, json=payload, timeout=10)
+        response = requests.post(TEAMS_WEBHOOK_URL, json=payload, timeout=10)
+        if response.status_code not in [200, 202]:
+            logging.error(f"Erro ao enviar Teams. Status: {response.status_code}, Resposta: {response.text}")
+        else:
+            logging.info(f"Notificação Teams enviada com sucesso! Status: {response.status_code}")
     except Exception as e:
         logging.error(f"Erro ao enviar Teams: {e}")
 

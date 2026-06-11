@@ -40,7 +40,7 @@ Abra o arquivo `.env` e defina seu usuário SSH, senha SSH e a lista de servidor
 
 > 💡 **Exemplo de lista de servidores**:
 > ```env
-> SERVERS_JSON='[{"ip": "172.21.0.173", "name": "Access Gateway stg 01"}]'
+> SERVERS_JSON='[{"ip": "10.0.0.1", "name": "Access Gateway apache"}]'
 > ```
 
 ### 3. Configurar o Ambiente Virtual (`venv`)
@@ -63,7 +63,7 @@ Execute o script utilizando o interpretador do ambiente virtual:
 
 ### Saída Esperada no Terminal:
 ```text
---- Access Gateway stg 01 (172.21.0.173) ---
+--- Access Gateway apache 01 (10.0.0.1) ---
 ⏱️ Uptime do Sistema: 2.14 dias
 🔄 Servidor online há mais de 1 dia. Reiniciando o Apache (httpd)...
 ✅ Apache (httpd) reiniciado com sucesso!

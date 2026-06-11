@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "nome": "Alairton",
+        "cargo": "Analista Sênior",
+        "tecnologias": [
+            "Python",
+            "Docker"
+        ]
+    },
+    {
+        "id": 2,
+        "nome": "Maria",
+        "cargo": "Desenvolvedora",
+        "tecnologias": [
+            "SQL",
+            "IRIS"
+        ]
+    }
+]
