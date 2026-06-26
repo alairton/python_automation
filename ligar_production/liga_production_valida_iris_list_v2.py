@@ -6,6 +6,7 @@ import logging
 import requests
 import winsound
 import paramiko
+import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -19,15 +20,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- CONFIGURAÇÕES ---
-TEAMS_WEBHOOK_URL = os.getenv("TEAMS_WEBHOOK_URL")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 USUARIO_WEB = os.getenv("USUARIO_WEB")
 SENHA_WEB = os.getenv("SENHA_WEB")
 
 SSH_USER = os.getenv("SSH_USER")
 SSH_PASS = os.getenv("SSH_PASS")
 
-if not all([TEAMS_WEBHOOK_URL, USUARIO_WEB, SENHA_WEB, SSH_USER, SSH_PASS]):
-    raise ValueError("Erro crítico: As configurações e credenciais (TEAMS_WEBHOOK_URL, USUARIO_WEB, SENHA_WEB, SSH_USER, SSH_PASS) devem estar configuradas no arquivo .env!")
+if not all([TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, USUARIO_WEB, SENHA_WEB, SSH_USER, SSH_PASS]):
+    raise ValueError("Erro crítico: As configurações e credenciais (TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID, USUARIO_WEB, SENHA_WEB, SSH_USER, SSH_PASS) devem estar configuradas no arquivo .env!")
 
 PATH_OPENVPN_GUI = r"C:\Program Files\OpenVPN\bin\openvpn-gui.exe"
 NOME_CONFIG_OVPN = "downloaded-client-config.ovpn"
@@ -52,61 +54,32 @@ def emitir_alerta_sonoro():
         time.sleep(0.1)
 
 
-def enviar_teams(msg, status):
-    if not TEAMS_WEBHOOK_URL:
-        logging.warning("TEAMS_WEBHOOK_URL não está configurada no arquivo .env.")
+def enviar_telegram(msg, status):
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        logging.warning("TELEGRAM_BOT_TOKEN ou TELEGRAM_CHAT_ID não estão configuradas no arquivo .env.")
         return
 
-    is_modern_workflow = "logic.azure.com" in TEAMS_WEBHOOK_URL
+    # Converte **negrito** em <b>negrito</b> para HTML do Telegram
+    msg_html = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', msg)
+    
+    emoji = "🟢" if status == "Sucesso" else "🔴"
+    texto_final = f"{emoji} <b>Automação IRIS: {status}</b>\n\n{msg_html}"
 
-    if is_modern_workflow:
-        # Formato moderno para Workflows do Teams (Power Automate) usando Adaptive Card
-        payload = {
-            "type": "message",
-            "attachments": [
-                {
-                    "contentType": "application/vnd.microsoft.card.adaptive",
-                    "content": {
-                        "type": "AdaptiveCard",
-                        "version": "1.2",
-                        "body": [
-                            {
-                                "type": "TextBlock",
-                                "text": f"**Automação IRIS: {status}**",
-                                "weight": "Bolder",
-                                "size": "Medium",
-                                "color": "Good" if status == "Sucesso" else "Attention"
-                            },
-                            {
-                                "type": "TextBlock",
-                                "text": msg,
-                                "wrap": True
-                            }
-                        ],
-                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
-                    }
-                }
-            ]
-        }
-    else:
-        # Formato legado (MessageCard)
-        color = "00FF00" if status == "Sucesso" else "FF0000"
-        payload = {
-            "@type": "MessageCard",
-            "@context": "http://schema.org/extensions",
-            "themeColor": color,
-            "summary": "Status Produção IRIS",
-            "sections": [{"activityTitle": f"Automação IRIS: {status}", "text": msg, "markdown": True}]
-        }
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": texto_final,
+        "parse_mode": "HTML"
+    }
 
     try:
-        response = requests.post(TEAMS_WEBHOOK_URL, json=payload, timeout=10)
-        if response.status_code not in [200, 202]:
-            logging.error(f"Erro ao enviar Teams. Status: {response.status_code}, Resposta: {response.text}")
+        response = requests.post(url, json=payload, timeout=10)
+        if response.status_code != 200:
+            logging.error(f"Erro ao enviar Telegram. Status: {response.status_code}, Resposta: {response.text}")
         else:
-            logging.info(f"Notificação Teams enviada com sucesso! Status: {response.status_code}")
+            logging.info(f"Notificação Telegram enviada com sucesso! Status: {response.status_code}")
     except Exception as e:
-        logging.error(f"Erro ao enviar Teams: {e}")
+        logging.error(f"Erro ao enviar Telegram: {e}")
 
 
 def validar_via_iris_list_ssh(ip):
@@ -173,7 +146,7 @@ def main():
 
     if not sistemas_online:
         logging.critical("Nenhum sistema acessível via SSH. Abortando.")
-        enviar_teams("Falha Crítica: Todos os sistemas via SSH estão offline.", "Erro")
+        enviar_telegram("Falha Crítica: Todos os sistemas via SSH estão offline.", "Erro")
         return
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -199,7 +172,7 @@ def main():
         driver.quit()
         status_final = "Sucesso" if not falhas else "Atenção"
         resumo = f"**Sistemas Online:** {', '.join(sucessos) if sucessos else 'Nenhum'}\n\n**Falhas/Offline:** {', '.join(falhas) if falhas else 'Nenhuma'}"
-        enviar_teams(resumo, status_final)
+        enviar_telegram(resumo, status_final)
         logging.info("=== Processo Finalizado Production ONLINE ===")
 
 
