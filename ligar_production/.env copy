@@ -1,0 +1,13 @@
+# Configurações do Microsoft Teams
+TEAMS_WEBHOOK_URL=https://interallbrasil.webhook.office.com/webhookb2/2499d609-34c7-4ca9-9695-a0b1a4e7ac96@d8c97a0b-9867-4cd2-801d-c0aec4bc66db/IncomingWebhook/44f9670818e241bcaa3465e27e68e9bf/c5e4f48d-0fd7-40e4-97c0-63616ce8161f/V29dNflEalgYFla1Md1Ypa-LU3weO-AXxCugFCcAVG1Lg1
+
+# Credenciais do Portal Web IRIS
+USUARIO_WEB=alairtonpereira
+SENHA_WEB=Csp4rT3ch*2020
+
+# Credenciais do Servidor via SSH
+SSH_USER=cspar.alairton
+SSH_PASS=vSf1j4e934hO
+
+# Lista de Sistemas IRIS (Staging e Desenvolvimento)
+SISTEMAS_JSON='[{"nome": "HSHC STG", "url": "http://172.21.0.68/hshcstg/csp/sys/UtilHome.csp", "ip": "172.21.0.68"}, {"nome": "UCR STG", "url": "http://172.21.0.84/hsucrstg/csp/sys/UtilHome.csp", "ip": "172.21.0.84"}, {"nome": "PI STG", "url": "http://172.21.0.84/hspistg/csp/sys/UtilHome.csp", "ip": "172.21.0.84"}, {"nome": "HI STG", "url": "http://172.21.0.46/hshistg/csp/sys/UtilHome.csp", "ip": "172.21.0.46"}, {"nome": "HSFG STG", "url": "http://172.21.0.46/hsfgstg/csp/sys/UtilHome.csp", "ip": "172.21.0.46"}, {"nome": "AGW STG", "url": "http://172.21.0.23/hsagwstg/csp/sys/UtilHome.csp", "ip": "172.21.0.23"}, {"nome": "HSHC DEV", "url": "http://172.21.0.190/csp/sys/UtilHome.csp", "ip": "172.21.0.190"}, {"nome": "UCR DEV", "url": "http://172.21.0.190/hsucrdev/csp/sys/UtilHome.csp", "ip": "172.21.0.190"}, {"nome": "PI DEV", "url": "http://172.21.0.190/hspidev/csp/sys/UtilHome.csp", "ip": "172.21.0.190"}, {"nome": "HI DEV", "url": "http://172.21.0.190/hshidev/csp/sys/UtilHome.csp", "ip": "172.21.0.190"}, {"nome": "AGW DEV", "url": "http://172.21.0.190/hsagwdev/csp/sys/UtilHome.csp", "ip": "172.21.0.190"}]'

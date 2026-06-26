@@ -1,0 +1,14 @@
+- `[x]` Task 1: Environment Configuration
+    - `[x]` Step 1: Update `.env.example`
+    - `[x]` Step 2: Update `.env`
+    - `[x]` Step 3: Commit changes
+- `[x]` Task 2: Create Test Script `testar_telegram.py`
+    - `[x]` Step 1: Create `testar_telegram.py`
+    - `[x]` Step 2: Delete `testar_webhook.py`
+    - `[x]` Step 3: Run the new test script
+    - `[x]` Step 4: Commit changes
+- `[x]` Task 3: Update Main Automation Script `liga_production_valida_iris_list_v2.py`
+    - `[x]` Step 1: Modify Environment loading and validation
+    - `[x]` Step 2: Replace `enviar_teams` with `enviar_telegram`
+    - `[x]` Step 3: Update callers
+    - `[x]` Step 4: Commit changes

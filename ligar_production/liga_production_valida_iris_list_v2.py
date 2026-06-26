@@ -36,14 +36,17 @@ NOME_CONFIG_OVPN = "downloaded-client-config.ovpn"
 
 SISTEMAS_RAW = os.getenv("SISTEMAS_JSON")
 if not SISTEMAS_RAW:
-    raise ValueError("Erro crítico: A lista de sistemas (SISTEMAS_JSON) não está configurada no arquivo .env!")
+    raise ValueError(
+        "Erro crítico: A lista de sistemas (SISTEMAS_JSON) não está configurada no arquivo .env!")
 
 try:
     SISTEMAS = json.loads(SISTEMAS_RAW)
 except Exception as e:
-    raise ValueError(f"Erro crítico: A variável SISTEMAS_JSON no arquivo .env não é um JSON válido! Detalhes: {e}")
+    raise ValueError(
+        f"Erro crítico: A variável SISTEMAS_JSON no arquivo .env não é um JSON válido! Detalhes: {e}")
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s [%(levelname)s] %(message)s')
 
 
 # --- FUNÇÕES ---
@@ -56,12 +59,13 @@ def emitir_alerta_sonoro():
 
 def enviar_telegram(msg, status):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        logging.warning("TELEGRAM_BOT_TOKEN ou TELEGRAM_CHAT_ID não estão configuradas no arquivo .env.")
+        logging.warning(
+            "TELEGRAM_BOT_TOKEN ou TELEGRAM_CHAT_ID não estão configuradas no arquivo .env.")
         return
 
     # Converte **negrito** em <b>negrito</b> para HTML do Telegram
     msg_html = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', msg)
-    
+
     emoji = "🟢" if status == "Sucesso" else "🔴"
     texto_final = f"{emoji} <b>Automação IRIS: {status}</b>\n\n{msg_html}"
 
@@ -75,9 +79,11 @@ def enviar_telegram(msg, status):
     try:
         response = requests.post(url, json=payload, timeout=10)
         if response.status_code != 200:
-            logging.error(f"Erro ao enviar Telegram. Status: {response.status_code}, Resposta: {response.text}")
+            logging.error(
+                f"Erro ao enviar Telegram. Status: {response.status_code}, Resposta: {response.text}")
         else:
-            logging.info(f"Notificação Telegram enviada com sucesso! Status: {response.status_code}")
+            logging.info(
+                f"Notificação Telegram enviada com sucesso! Status: {response.status_code}")
     except Exception as e:
         logging.error(f"Erro ao enviar Telegram: {e}")
 
@@ -99,13 +105,16 @@ def processar_sistema(driver, sistema):
     wait = WebDriverWait(driver, 20)
     try:
         driver.get(sistema['url'])
-        user_field = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "input[name*='User']")))
+        user_field = wait.until(EC.element_to_be_clickable(
+            (By.CSS_SELECTOR, "input[name*='User']")))
         user_field.send_keys(USUARIO_WEB)
-        pass_field = driver.find_element(By.CSS_SELECTOR, "input[type='password']")
+        pass_field = driver.find_element(
+            By.CSS_SELECTOR, "input[type='password']")
         pass_field.send_keys(SENHA_WEB + Keys.ENTER)
 
         wait.until(EC.element_to_be_clickable((By.ID, "cat_HS"))).click()
-        wait.until(EC.element_to_be_clickable((By.ID, "command_cmdStart"))).click()
+        wait.until(EC.element_to_be_clickable(
+            (By.ID, "command_cmdStart"))).click()
 
         # Pausa curta para você conseguir ver o pop-up antes do accept
         time.sleep(2)
@@ -124,7 +133,8 @@ def processar_sistema(driver, sistema):
 
 def main():
     logging.info("Iniciando comando OpenVPN GUI...")
-    subprocess.Popen(f'"{PATH_OPENVPN_GUI}" --connect "{NOME_CONFIG_OVPN}"', shell=True)
+    subprocess.Popen(
+        f'"{PATH_OPENVPN_GUI}" --connect "{NOME_CONFIG_OVPN}"', shell=True)
     logging.info("Aguardando 10s para túnel estabilizar...")
     time.sleep(10)
 
@@ -136,7 +146,8 @@ def main():
     for sis in SISTEMAS:
         is_up, info = validar_via_iris_list_ssh(sis['ip'])
         if is_up:
-            logging.info(f"   [ONLINE] {sis['nome']} - Instância está RUNNING.")
+            logging.info(
+                f"   [ONLINE] {sis['nome']} - Instância está RUNNING.")
             sistemas_online.append(sis)
         else:
             msg_erro = f"{sis['nome']} (Instância DOWN ou SSH falhou)"
@@ -146,7 +157,8 @@ def main():
 
     if not sistemas_online:
         logging.critical("Nenhum sistema acessível via SSH. Abortando.")
-        enviar_telegram("Falha Crítica: Todos os sistemas via SSH estão offline.", "Erro")
+        enviar_telegram(
+            "Falha Crítica: Todos os sistemas via SSH estão offline.", "Erro")
         return
 
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -161,11 +173,13 @@ def main():
             if processar_sistema(driver, sis):
                 sucessos.append(sis['nome'])
             else:
-                falhas.append(f"{sis['nome']} (Verificar falha de inicialização)")
+                falhas.append(
+                    f"{sis['nome']} (Verificar falha de inicialização)")
                 emitir_alerta_sonoro()
 
         # --- PAUSA PARA VERIFICAÇÃO MANUAL ---
-        logging.info("Aguardando 2 minutos para conferência manual dos pop-ups...")
+        logging.info(
+            "Aguardando 2 minutos para conferência manual dos pop-ups...")
         time.sleep(120)
 
     finally:
