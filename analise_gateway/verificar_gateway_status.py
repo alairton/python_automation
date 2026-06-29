@@ -1,6 +1,5 @@
 import os
 import json
-import logging
 import sys
 import paramiko
 from dotenv import load_dotenv
@@ -32,10 +31,9 @@ except Exception as e:
     raise ValueError(f"Erro crítico: A variável SERVERS_JSON no arquivo .env não é um JSON válido! Detalhes: {e}")
 
 
-def get_httpd_metrics(ip, name):
+def check_gateway_status(ip, name):
     print(f"\n--- {name} ({ip}) ---")
     
-    # Inicialização limpa do cliente SSH (sem redundâncias)
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
@@ -43,7 +41,7 @@ def get_httpd_metrics(ip, name):
         # Conexão SSH
         client.connect(ip, username=SSH_USER, password=SSH_PASS, timeout=5)
 
-        # 1. Validação de Uptime do Sistema
+        # 1. Obtenção do Uptime do Sistema
         stdin, stdout, stderr = client.exec_command("cat /proc/uptime")
         uptime_out = stdout.read().decode().strip()
         
@@ -51,34 +49,6 @@ def get_httpd_metrics(ip, name):
             uptime_sec = float(uptime_out.split()[0])
             uptime_dias = uptime_sec / 86400
             print(f"⏱️ Uptime do Sistema: {uptime_dias:.2f} dias")
-            
-            # Se o servidor estiver ligado há mais de 1 dia (24 horas), reinicia o Apache
-            if uptime_dias > 1.0:
-                print(f"🔄 Servidor online há mais de 1 dia. Reiniciando o Apache (httpd)...")
-                stdin_res, stdout_res, stderr_res = client.exec_command("sudo -S systemctl restart httpd")
-                stdin_res.write(SSH_PASS + "\n")
-                stdin_res.flush()
-                
-                # Aguarda o término do comando
-                exit_status = stdout_res.channel.recv_exit_status()
-                
-                if exit_status != 0:
-                    err_out = stderr_res.read().decode().strip()
-                    # Filtra mensagens comuns de prompt do sudo para exibir apenas erros reais
-                    lines = err_out.split("\n")
-                    clean_lines = [
-                        line for line in lines 
-                        if "password for" not in line.lower() 
-                        and "senha para" not in line.lower() 
-                        and "[sudo]" not in line.lower()
-                    ]
-                    err_out = "\n".join(clean_lines).strip()
-                    if not err_out:
-                        err_out = "Falha na autenticação do sudo ou erro na execução do comando."
-                    
-                    print(f"❌ Erro ao reiniciar Apache (Código: {exit_status}): {err_out}")
-                else:
-                    print(f"✅ Apache (httpd) reiniciado com sucesso!")
 
         # 2. Comando focado nas linhas de performance do Apache
         cmd = "systemctl status httpd | grep -E 'Active:|Status:|Memory:|CPU:'"
@@ -110,4 +80,4 @@ def get_httpd_metrics(ip, name):
 
 if __name__ == "__main__":
     for server in SERVERS:
-        get_httpd_metrics(server["ip"], server["name"])
+        check_gateway_status(server["ip"], server["name"])

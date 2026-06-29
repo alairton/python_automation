@@ -55,8 +55,16 @@ python -m venv venv
 
 ## 🏃 Como Executar
 
-Execute o script utilizando o interpretador do ambiente virtual:
+O projeto conta com dois scripts principais que utilizam o interpretador do ambiente virtual:
 
+### 1. Apenas Visualizar Status (Leitura)
+Para verificar o Uptime do Sistema e as métricas do Apache (`Active`, `Status`, `Memory`, `CPU`) sem reiniciar nada:
+```powershell
+.\venv\Scripts\python.exe verificar_gateway_status.py
+```
+
+### 2. Verificar Status e Reiniciar Apache (Automação)
+Para monitorar a saúde e reiniciar automaticamente o Apache (`httpd`) caso o servidor esteja online há mais de 1 dia:
 ```powershell
 .\venv\Scripts\python.exe analise_gateway_ssh.py
 ```
